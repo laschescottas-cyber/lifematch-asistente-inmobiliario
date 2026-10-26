@@ -9,9 +9,9 @@
 | HU-05 | LifeMatch y rentabilidad separada | MotorMatching, EstimadorRentabilidad, Rentabilidad, Match | `test_hu05_matching.py`, `test_hu05_rentabilidad.py`, `test_integracion.py` | resultados y detalle |
 | HU-06 | Explicaciones Gemini a partir de datos del match | ClienteGemini, ServicioExplicacionIA, Explicacion | `test_hu06_explicacion.py`, `test_integracion.py` | detalle |
 | HU-07 | Timeout/errores/vacío → respaldo | PlantillaRespaldo, ServicioExplicacionIA | `test_hu07_respaldo.py` | detalle sin error técnico |
-| HU-08 | Tarjetas y orden | ItemResultado, `ui/logica.py` | `test_hu08_resultados.py` | resultados / ordenar / detalle |
+| HU-08 | Tarjetas y orden | ItemResultado, `ui/logica.py` | `test_hu08_resultados.py`, `test_ui_streamlit.py` | resultados / ordenar / detalle |
 
-La suite comprueba clases, reglas de negocio, persistencia y utilidades de pantalla **sin ejecutar interacciones visuales de Streamlit**. Los criterios de aceptación relativos a mostrar controles, editar sobre la interfaz o captar eventos deben validarse manualmente. Los tests de Gemini usan fakes: **no prueban** la API real. No se debe presentar esto como cobertura E2E de navegador.
+La suite comprueba clases, reglas de negocio, persistencia y utilidades de pantalla. Desde el 25/10/2026, `test_ui_streamlit.py` ejecuta además la app con `streamlit.testing` (sin navegador): cinco perfiles (HU-01), aviso de zona vacía (HU-02), sin resultados (HU-03) y tarjetas ordenadas con rentabilidad separada (HU-08). Los criterios de aceptación relativos a mostrar controles, editar sobre la interfaz o captar eventos deben validarse manualmente. Los tests de Gemini usan fakes: **no prueban** la API real. No se debe presentar esto como cobertura E2E de navegador.
 
 ## Casos numéricos de control
 

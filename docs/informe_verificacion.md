@@ -35,3 +35,13 @@
 | 9. No verificado | **Pendiente** | Gemini real con clave, Streamlit real, Windows/Python 3.12, dataset completo, rendimiento en millones de avisos, publicación GitHub y 3 capturas auténticas de Trello |
 
 **Importante:** la funcionalidad de IA obligatoria de la consigna requiere una demostración **real** contra Gemini, además de esta validación sin API. El modo demo es un simulador y se presenta como tal.
+
+## Revisión del 25 de octubre de 2026 (incorporación al repositorio)
+
+- **Streamlit sí se ejecutó** (1.66, Python 3.13, modo `DEMO=1`), recorriendo en navegador las rutas «Familia con hijos» e «Inversor» de punta a punta.
+- **Bug encontrado y corregido:** la pantalla de resultados lanzaba `TypeError: object of type 'method' has no len()`. `st.session_state.items` devuelve el método `items()` del estado, no la lista guardada. Se renombró la clave a `resultados`. Los 58 tests previos no lo detectaban porque no ejecutaban la interfaz.
+- **Nuevo:** `tests/test_ui_streamlit.py` (5 tests con `streamlit.testing`), que falla si se reintroduce el bug.
+- **Rendimiento con Gemini real:** las explicaciones del top N se generaban en serie (hasta `TOP_N × LLM_TIMEOUT_S` en el peor caso). Ahora se piden en paralelo (`LLM_CONCURRENCIA`, por defecto 4), con un test que lo verifica.
+- **Interfaz:** cada tarjeta indica el origen de la explicación (Gemini, simulada en modo demo, o automática de respaldo). La etiqueta «Capital máximo de compra (USD)» ya no fija la moneda, y la superficie se muestra como «60 m²».
+- **Prompt:** se agregó la consigna del borrador del DOCX: primero las variables que más aportaron y después las limitaciones.
+- Resultado: **64 tests aprobados**. Sigue **sin probarse la llamada real a Gemini**: este entorno no tiene salida a la API.

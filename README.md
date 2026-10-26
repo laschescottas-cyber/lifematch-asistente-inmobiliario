@@ -14,7 +14,7 @@ El sistema combina: (1) filtros duros, (2) índice reproducible **LifeMatch** (0
 
 ## Instalación, PowerShell
 
-Desde la carpeta `inmobiliaria-ia`:
+Desde la raíz del repositorio:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -47,6 +47,7 @@ $env:GEMINI_API_KEY = "TU_CLAVE_PERSONAL"
 $env:GEMINI_MODEL = "EL_MODELO_HABILITADO_PARA_TU_CUENTA"
 $env:LLM_TIMEOUT_S = "8"
 $env:TOP_N = "10"
+$env:LLM_CONCURRENCIA = "4"   # bajar a 1-2 si el plan gratuito de Gemini devuelve 429
 $env:DB_PATH = "data/inmobiliaria.db"
 ```
 
@@ -62,7 +63,7 @@ python scripts/probar_gemini.py
 streamlit run app.py
 ```
 
-Secuencia: seleccionar perfil → condiciones → prioridades (sliders) → resumen editable → resultados → detalles. Las fotos y distancias reales no existen en la fuente histórica, así que no se inventan. El `TOP_N` indica cuántos candidatos de mayor LifeMatch se explican y guardan por búsqueda.
+Secuencia: seleccionar perfil → condiciones → prioridades (sliders) → resumen editable → resultados → detalles. Las fotos y distancias reales no existen en la fuente histórica, así que no se inventan. El `TOP_N` indica cuántos candidatos de mayor LifeMatch se explican y guardan por búsqueda. Las explicaciones se piden a Gemini en paralelo (`LLM_CONCURRENCIA`), así que el tiempo de búsqueda no crece en proporción a `TOP_N`; para la demo en vivo conviene `TOP_N=5`.
 
 ## Modo demo sin internet (datos sintéticos)
 
@@ -93,7 +94,7 @@ El script usa una base temporal y ejecuta familia, inversor, contraste de perfil
 python -m pytest -q
 ```
 
-La suite usa bases de datos temporales y clientes de IA falsos. **Nunca consume créditos de Gemini**, ni requiere internet o descargar Properati. Incluye los casos numéricos de LifeMatch **86,8 / 80,0 / 89,5 / 94,0**. Revisá el resultado real final y la cobertura en `docs/trazabilidad.md`.
+La suite usa bases de datos temporales y clientes de IA falsos. `tests/test_ui_streamlit.py` recorre las pantallas reales de la app con `streamlit.testing` (modo demo) hasta los resultados de las rutas vivir e invertir y la pantalla sin resultados. **Nunca consume créditos de Gemini**, ni requiere internet o descargar Properati. Incluye los casos numéricos de LifeMatch **86,8 / 80,0 / 89,5 / 94,0**. Revisá el resultado real final y la cobertura en `docs/trazabilidad.md`.
 
 ## Arquitectura
 
@@ -111,6 +112,8 @@ ServicioExplicacionIA → ClienteGemini (HU-06)
     ↓
 Match + rentabilidad + explicación → SQLite → tarjetas / detalle
 ```
+
+Detalle completo de capas, carpetas, flujo de integración con Gemini y esquema SQLite (diagrama ER) en [`docs/arquitectura.md`](docs/arquitectura.md).
 
 `src/inmobiliaria/modelos.py` contiene las entidades del TP. `repositorio.py` guarda el DER en SQLite. `catalogo.py` transforma y carga. `ui/logica.py` ofrece utilidades puras y probables; `ui/pantallas.py` presenta la aplicación.
 
