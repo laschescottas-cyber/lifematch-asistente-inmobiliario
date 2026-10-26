@@ -6,6 +6,17 @@ Etiquetas: **Agregado** (funcionalidad nueva) · **Cambiado** (cambio de comport
 
 ---
 
+## 25/10/2026 · PR #3 — Diagnóstico de errores de Gemini
+
+**Cambiado**
+- Cuando Gemini rechaza un pedido, el registro de la app («Manage app» en Streamlit Cloud) muestra el código, el motivo y una pista de qué revisar (por ejemplo: `ClientError 404 NOT_FOUND … → revisá GEMINI_MODEL`). Antes solo decía `ClientError`. La clave nunca aparece en el registro: se enmascara. (HU-06, HU-07)
+- 2 tests nuevos: 74 en total.
+
+## 25/10/2026 · Configuración de la app publicada (Streamlit Cloud → Ajustes → Secretos)
+
+- `CATALOGO = "demo"`, `LLM = "gemini"`, `GEMINI_MODEL = "gemini-3.5-flash-lite"`, `TOP_N = "5"` y la clave de Gemini (no se registra acá).
+- Primera prueba: las explicaciones salieron con la plantilla de respaldo y el registro mostró `ClientError` (Gemini rechazó el pedido). En investigación con el PR #3.
+
 ## 25/10/2026 · PR #2 — App publicada: catálogo de prueba con Gemini real
 
 **Cambiado**
