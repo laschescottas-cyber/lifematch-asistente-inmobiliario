@@ -14,13 +14,17 @@ from inmobiliaria.explicacion.plantilla import PlantillaRespaldo
 from inmobiliaria.explicacion.cliente_llm import ClienteGemini
 from inmobiliaria.ui.demo import ClienteDemo,cargar_demo_si_vacio
 from inmobiliaria.backend import Backend
-from inmobiliaria.config import db_path,top_n
+from inmobiliaria.config import top_n,fuente_catalogo,proveedor_llm,simular_falla_llm,ruta_base_datos
+
+MENSAJE_CATALOGO_VACIO = ('El catálogo de propiedades está vacío. Cargá el dataset de Properati con '
+                          '`python scripts/cargar_catalogo.py data/properati.csv` o configurá CATALOGO=demo.')
 
 logger = logging.getLogger(__name__)
 
 
 def mostrar() -> None:
     import streamlit as st
+    _secretos_a_entorno(st)
     st.set_page_config(page_title='LifeMatch · Asistente inmobiliario',page_icon='🏠',layout='centered')
     st.title('🏠 LifeMatch')
     st.caption('Asistente inmobiliario inteligente según tu perfil de vida e inversión')
@@ -103,15 +107,18 @@ def mostrar() -> None:
         if st.button('Buscar propiedades',type='primary',disabled=bool(errores)):
             repo: RepositorioSQLite | None = None
             try:
-                ruta = 'data/demo.db' if os.getenv('DEMO')=='1' else db_path()
-                repo = RepositorioSQLite(ruta)
-                if os.getenv('DEMO')=='1': cargar_demo_si_vacio(repo)
+                repo = RepositorioSQLite(ruta_base_datos())
+                if fuente_catalogo()=='demo': cargar_demo_si_vacio(repo)
+                if repo.con.execute('SELECT COUNT(*) FROM propiedad').fetchone()[0]==0:
+                    # Sin esto, una base vacía se mostraba como «no hay propiedades que cumplan tus condiciones».
+                    st.error(MENSAJE_CATALOGO_VACIO)
+                    st.stop()
                 repo.guardar_usuario(usuario)
                 pref.id_usuario = usuario.id_usuario
                 repo.guardar_preferencia(pref,perfil)
                 cat = Catalogo(repo)
                 motor = MotorMatching(EstimadorRentabilidad(repo),cat)
-                cliente = ClienteDemo(os.getenv('DEMO_LLM','ok').lower()=='falla') if os.getenv('DEMO')=='1' else ClienteGemini()
+                cliente = ClienteDemo(simular_falla_llm()) if proveedor_llm()=='simulado' else ClienteGemini()
                 servicio = ServicioExplicacionIA(cliente,PlantillaRespaldo())
                 res = Backend(cat,motor,servicio,repo,top_n()).buscar(pref,perfil)
                 st.session_state.resultados=res.items
@@ -150,7 +157,7 @@ def mostrar() -> None:
                         st.write(formatear_porcentaje(r.rentabilidad_bruta_anual) if r.disponible else 'Sin datos suficientes')
                     st.write(e.texto)
                     with st.expander('Detalle y variables del cálculo'):
-                        st.caption(texto_origen(e.origen,os.getenv('DEMO')=='1'))
+                        st.caption(texto_origen(e.origen,proveedor_llm()=='simulado'))
                         for v,d in m.detalle.items():
                             st.write(f'{ETIQUETAS[v]} · aporte {formatear_porcentaje(d.aporte)}')
                             st.progress(min(1.,max(0.,d.cumplimiento)))
@@ -174,3 +181,17 @@ def _construir_busqueda(st: object) -> tuple[Usuario,Preferencia,PerfilInversor 
     pref=usuario.completar_preferencias(s.operacion,float(s.presupuesto),s.moneda,s.zona,int(s.ambientes),pesos_desde_sliders(s.peso_sliders))
     perfil=PerfilInversor(None,None,float(s.rentabilidad_objetivo),int(s.horizonte_anios),float(s.tipo_cambio) if s.tipo_cambio else None) if inv else None
     return usuario,pref,perfil
+
+
+def _secretos_a_entorno(st: object) -> None:
+    """En Streamlit Cloud la configuración se carga en Settings → Secrets.
+
+    Se copian las claves de primer nivel a variables de entorno (sin pisar las que ya existan),
+    así config.py funciona igual en la PC del equipo y en la app publicada. Nunca se muestran.
+    """
+    try:
+        for clave, valor in st.secrets.items():
+            if isinstance(valor, (str, int, float, bool)) and clave not in os.environ:
+                os.environ[clave] = str(valor)
+    except Exception:  # sin secrets.toml (uso local): no hay nada que copiar
+        pass

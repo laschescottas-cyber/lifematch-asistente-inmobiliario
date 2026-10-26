@@ -65,20 +65,45 @@ streamlit run app.py
 
 Secuencia: seleccionar perfil → condiciones → prioridades (sliders) → resumen editable → resultados → detalles. Las fotos y distancias reales no existen en la fuente histórica, así que no se inventan. El `TOP_N` indica cuántos candidatos de mayor LifeMatch se explican y guardan por búsqueda. Las explicaciones se piden a Gemini en paralelo (`LLM_CONCURRENCIA`), así que el tiempo de búsqueda no crece en proporción a `TOP_N`; para la demo en vivo conviene `TOP_N=5`.
 
-## Modo demo sin internet (datos sintéticos)
+## Catálogo y proveedor de IA (dos configuraciones independientes)
+
+| Variable | Valores | Qué decide |
+|---|---|---|
+| `CATALOGO` | `properati` (por defecto) · `demo` | De dónde salen las propiedades: la base cargada con `scripts/cargar_catalogo.py` o el catálogo **sintético** `data/muestra_demo.csv` |
+| `LLM` | `gemini` (por defecto) · `simulado` | Quién redacta la explicación: la API real de Gemini o `ClienteDemo`, sin red |
+| `DEMO_LLM` | `ok` · `falla` | Solo con `LLM=simulado`: `falla` fuerza el plan de respaldo (HU-07) |
+| `DEMO` | `1` | Atajo compatible: equivale a `CATALOGO=demo` + `LLM=simulado`. Si se definen `CATALOGO` o `LLM`, esas ganan |
+
+Combinaciones habituales:
 
 ```powershell
-$env:DEMO = "1"
-$env:DEMO_LLM = "ok"
-streamlit run app.py
+# Sin internet: catálogo de prueba + IA simulada
+$env:CATALOGO = "demo"; $env:LLM = "simulado"; streamlit run app.py
+
+# Catálogo de prueba + Gemini real (lo que usa la app publicada)
+$env:CATALOGO = "demo"; $env:LLM = "gemini"; streamlit run app.py
+
+# Forzar el plan de respaldo
+$env:CATALOGO = "demo"; $env:LLM = "simulado"; $env:DEMO_LLM = "falla"; streamlit run app.py
 ```
 
-Con `DEMO=1` se usa el cliente de prueba `ClienteDemo` y se carga el dataset **sintético** incluido (`data/muestra_demo.csv`). Esto demuestra la interfaz y la integración entre módulos, pero **no verifica una API de IA real**. Para forzar el plan de respaldo (HU-07) reiniciá la aplicación después de indicar:
+Con `LLM=simulado` la explicación **no** proviene de una IA real y la tarjeta lo indica («Modo demo: explicación simulada»). Si `CATALOGO=properati` y la base está vacía, la app lo avisa en vez de responder «no hay propiedades que cumplan tus condiciones».
 
-```powershell
-$env:DEMO_LLM = "falla"
-streamlit run app.py
+## Publicación en Streamlit Cloud
+
+La app se publica desde la rama `main`: cada cambio que llega a `main` se republica solo. La configuración va en **Settings → Secrets** de la app (formato TOML) y **nunca** en el repositorio:
+
+```toml
+CATALOGO = "demo"
+LLM = "gemini"
+GEMINI_API_KEY = "la clave personal"
+GEMINI_MODEL = "el modelo habilitado para la cuenta"
+TOP_N = "5"
 ```
+
+`ui/pantallas.py` copia esas claves a variables de entorno al iniciar, así la misma configuración funciona en la PC y en la nube. Sin clave o con la API caída, la app sigue funcionando con la explicación de respaldo. El CSV completo de Properati no se sube a GitHub, por eso la app publicada usa el catálogo de prueba.
+
+Los cambios se registran en [`CHANGELOG.md`](CHANGELOG.md) y entran a `main` mediante pull requests.
 
 Demo equivalente por consola (útil para ensayar y auditar resultados):
 

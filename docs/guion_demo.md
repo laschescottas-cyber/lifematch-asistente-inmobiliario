@@ -10,7 +10,7 @@ Preparación: desde PowerShell activar `.venv`; para probar la aplicación, ejec
 
 **2:30–3:00 | Cambia el ranking.** Reiniciar con otro perfil, por ejemplo «Profesional remoto», manteniendo el catálogo. Priorizar silencio/trabajo y contrastar con colegio/parques del perfil familiar.
 
-**3:00–3:30 | Contingencia.** En PowerShell definir `$env:DEMO="1"; $env:DEMO_LLM="falla"`; reiniciar Streamlit y buscar. Mostrar que aparece una explicación de plantilla **sin mensaje técnico**.
+**3:00–3:30 | Contingencia.** En PowerShell definir `$env:CATALOGO="demo"; $env:LLM="simulado"; $env:DEMO_LLM="falla"`; reiniciar Streamlit y buscar. Mostrar que aparece una explicación de plantilla **sin mensaje técnico**.
 
 **3:30–4:00 | Sin resultados.** Buscar una zona inexistente y enseñar la sugerencia de ajustar presupuesto, zona o ambientes.
 

@@ -1,4 +1,4 @@
-"""Recorrido real de la app con streamlit.testing (sin navegador, sin red, modo DEMO).
+"""Recorrido real de la app con streamlit.testing (sin navegador, sin red, catálogo de prueba).
 
 Cubre los criterios de interfaz de HU-01, HU-02, HU-03 y HU-08 que la lógica pura no alcanza.
 """
@@ -15,8 +15,10 @@ APP = str(Path(__file__).resolve().parents[1] / 'app.py')
 @pytest.fixture
 def app(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)  # data/demo.db y data/muestra_demo.csv quedan en una carpeta temporal
-    monkeypatch.setenv('DEMO', '1')
-    monkeypatch.setenv('DEMO_LLM', 'ok')
+    for v in ('DEMO', 'DEMO_LLM', 'CATALOGO', 'LLM', 'GEMINI_API_KEY', 'GEMINI_MODEL', 'DB_PATH'):
+        monkeypatch.delenv(v, raising=False)
+    monkeypatch.setenv('CATALOGO', 'demo')
+    monkeypatch.setenv('LLM', 'simulado')
     at = AppTest.from_file(APP, default_timeout=30)
     at.run()
     return at
@@ -65,3 +67,28 @@ def test_hu02_zona_vacia_avisa_dato_faltante(app):
     app.text_input[0].set_value('   ')
     _boton(app, 'Continuar a las prioridades').click().run()
     assert app.error and 'zona' in app.error[0].value
+
+
+def test_catalogo_properati_vacio_avisa_en_vez_de_decir_sin_resultados(app, monkeypatch):
+    """App publicada sin base de Properati: antes decía «no hay propiedades que cumplan tus condiciones»."""
+    monkeypatch.setenv('CATALOGO', 'properati')
+    at = _recorrer_sin_assert(app, 'Familia con hijos')
+    assert at.error and 'catálogo de propiedades está vacío' in at.error[0].value
+    assert not at.success
+
+
+def test_catalogo_demo_con_gemini_sin_clave_usa_respaldo(app, monkeypatch):
+    """Catálogo de prueba + Gemini real: sin clave no se cae, muestra la explicación de respaldo (HU-07)."""
+    monkeypatch.setenv('LLM', 'gemini')
+    at = _recorrer(app, 'Familia con hijos')
+    assert at.success
+    assert any('automática armada con los datos' in c.value for c in at.caption)
+
+
+def _recorrer_sin_assert(at, perfil):
+    at.radio[0].set_value(perfil)
+    _boton(at, 'Continuar').click().run()
+    _boton(at, 'Continuar a las prioridades').click().run()
+    _boton(at, 'Revisar búsqueda').click().run()
+    _boton(at, 'Buscar propiedades').click().run()
+    return at
