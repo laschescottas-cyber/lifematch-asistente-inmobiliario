@@ -47,3 +47,28 @@ def test_persistencia_match_rentabilidad_explicacion(repo,csv_sintetico):
     assert len(res.items)==repo.con.execute('SELECT COUNT(*) FROM "match"').fetchone()[0]
     assert len(res.items)==repo.con.execute('SELECT COUNT(*) FROM rentabilidad').fetchone()[0]
     assert len(res.items)==repo.con.execute('SELECT COUNT(*) FROM explicacion').fetchone()[0]
+
+
+class _ClienteLentoOk:
+    def generar(self,prompt,timeout_s):
+        import time
+        time.sleep(.3)
+        return 'Explicación de prueba con datos del match.'
+
+
+def test_explicaciones_en_paralelo_no_suman_latencias(repo,csv_sintetico):
+    """Con Gemini real, explicar el top N en serie podía tardar decenas de segundos."""
+    import time
+    Catalogo(repo).cargar_csv(str(csv_sintetico))
+    u=Usuario(None,'Visitante','Familia con hijos'); repo.guardar_usuario(u)
+    pref=u.completar_preferencias('Venta',260000,'USD','Almagro',2,{'colegio':1.,'conectividad':.5})
+    repo.guardar_preferencia(pref)
+    cat=Catalogo(repo)
+    backend=Backend(cat,MotorMatching(EstimadorRentabilidad(repo,min_avisos=5),cat),ServicioExplicacionIA(_ClienteLentoOk(),PlantillaRespaldo(),2.0),repo,top_n=3,concurrencia=3)
+    t=time.monotonic()
+    res=backend.buscar(pref)
+    assert len(res.items)==3 and all(i.explicacion.origen=='llm' for i in res.items)
+    assert time.monotonic()-t < .3*3*.75  # claramente menos que 0,9 s en serie
+    # Cada explicación queda asociada a su propio match en SQLite.
+    filas=repo.con.execute('SELECT e.id_match, m.id_propiedad FROM explicacion e JOIN "match" m USING(id_match)').fetchall()
+    assert sorted(r[1] for r in filas)==sorted(i.propiedad.id for i in res.items)

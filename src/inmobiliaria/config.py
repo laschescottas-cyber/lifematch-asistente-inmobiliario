@@ -29,5 +29,10 @@ def top_n() -> int:
     return _int_env('TOP_N', 10)
 
 
+def concurrencia_llm() -> int:
+    """Explicaciones que se piden al LLM en simultáneo (bajar a 1-2 si el plan gratuito devuelve 429)."""
+    return _int_env('LLM_CONCURRENCIA', 4)
+
+
 def timeout_s() -> float:
     return _float_env('LLM_TIMEOUT_S', 8.0)

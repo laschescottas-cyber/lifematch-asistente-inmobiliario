@@ -16,7 +16,7 @@ INSTRUCCIONES = '''Sos un asesor inmobiliario. Redactá en español rioplatense 
 de por qué esta propiedad fue recomendada.
 Reglas:
 - Usá SOLO los datos provistos. No inventes nada.
-- Mencioná las variables de "a_favor".
+- Mencioná primero las variables de "a_favor" (las que más aportaron) y después las limitaciones.
 - Si "en_contra" o "sin_dato" no están vacíos, mencioná una limitación (si una variable de entorno vale 0, decí que "el aviso no lo menciona").
 - Si hay "rentabilidad", mencioná el porcentaje y el alquiler en que se basa, y aclará que es una estimación y no una garantía.
 - No uses listas ni encabezados. Respondé solo con el texto.'''
