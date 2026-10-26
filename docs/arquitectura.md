@@ -25,7 +25,7 @@ lifematch-asistente-inmobiliario/
 ├── pytest.ini                     # pythonpath = src
 ├── .env.example                   # variables de entorno (sin valores secretos)
 ├── src/inmobiliaria/
-│   ├── config.py                  # DB_PATH, TOP_N, LLM_TIMEOUT_S, LLM_CONCURRENCIA, MIN_AVISOS_ALQUILER
+│   ├── config.py                  # CATALOGO, LLM, DB_PATH, TOP_N, LLM_TIMEOUT_S, LLM_CONCURRENCIA, MIN_AVISOS_ALQUILER
 │   ├── modelos.py                 # Usuario, Preferencia, PerfilInversor, Propiedad, Match, Rentabilidad, Explicacion
 │   ├── arquetipos.py              # pesos por defecto de los 5 perfiles (HU-01)
 │   ├── filtros.py                 # FiltrosDuros (HU-03)
@@ -41,7 +41,7 @@ lifematch-asistente-inmobiliario/
 │   └── ui/
 │       ├── pantallas.py           # Streamlit
 │       ├── logica.py              # formateo, sliders→pesos, orden (puro)
-│       └── demo.py                # ClienteDemo + catálogo sintético (modo DEMO=1)
+│       └── demo.py                # ClienteDemo + catálogo sintético (CATALOGO=demo / LLM=simulado)
 ├── scripts/
 │   ├── cargar_catalogo.py         # importa data/properati.csv a SQLite
 │   ├── probar_gemini.py           # prueba MANUAL de la API real
