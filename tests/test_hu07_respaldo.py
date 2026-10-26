@@ -50,3 +50,26 @@ def test_plantilla_inversor(propiedad):
     m=MotorMatching().calcular_compatibilidad(pref,propiedad,perfil,renta)
     texto=PlantillaRespaldo().redactar(m,propiedad,'invertir',perfil)
     assert 'Rentabilidad bruta anual estimada:' in texto and 'Es una estimación, no una garantía.' in texto
+
+
+class _ErrorGemini(Exception):
+    """Imita google.genai.errors.ClientError (code, status, message)."""
+    def __init__(self, code, status, message):
+        super().__init__(message); self.code, self.status, self.message = code, status, message
+
+
+def test_registro_indica_codigo_motivo_y_pista(propiedad, pref_vivir, caplog):
+    class ClienteModeloInexistente:
+        def generar(self, prompt, timeout_s):
+            raise _ErrorGemini(404, 'NOT_FOUND', 'models/gemini-x is not found for API version v1beta')
+    m = MotorMatching().calcular_compatibilidad(pref_vivir, propiedad)
+    with caplog.at_level('WARNING'):
+        e = ServicioExplicacionIA(ClienteModeloInexistente(), PlantillaRespaldo(), .5).generar_explicacion(m, propiedad, pref_vivir)
+    assert e.origen == 'plantilla'
+    assert '404 NOT_FOUND' in caplog.text and 'GEMINI_MODEL' in caplog.text
+
+
+def test_registro_nunca_muestra_la_clave():
+    from inmobiliaria.explicacion.servicio import describir_error
+    texto = describir_error(_ErrorGemini(400, 'INVALID_ARGUMENT', 'API key not valid: AIzaSyD-ejemplo_1234567890abcdef'))
+    assert 'AIzaSyD' not in texto and 'AIza***' in texto and 'GEMINI_API_KEY' in texto

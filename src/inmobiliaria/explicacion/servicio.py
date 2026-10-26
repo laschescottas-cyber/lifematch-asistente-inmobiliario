@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import logging
 import queue
+import re
 import threading
 import os
 from inmobiliaria.modelos import Match,Propiedad,Preferencia,PerfilInversor,Explicacion
@@ -12,6 +13,35 @@ from inmobiliaria.explicacion.plantilla import PlantillaRespaldo
 from inmobiliaria.config import timeout_s as config_timeout
 
 logger = logging.getLogger(__name__)
+_PATRON_CLAVE = re.compile(r'AIza[0-9A-Za-z_\-]{8,}')
+_PISTAS = {
+    400: 'revisá GEMINI_API_KEY (clave inválida o mal copiada) o el formato del pedido',
+    401: 'revisá GEMINI_API_KEY',
+    403: 'la clave no tiene permiso para este modelo o proyecto',
+    404: 'revisá GEMINI_MODEL: el modelo no existe o no está habilitado para la cuenta',
+    429: 'se superó el límite del plan; bajá TOP_N o LLM_CONCURRENCIA, o probá más tarde',
+}
+
+
+def describir_error(exc: Exception) -> str:
+    """Resumen del error del proveedor para el registro: tipo, código, motivo y una pista.
+
+    Nunca incluye la clave: cualquier texto con forma de clave de Google se enmascara.
+    """
+    partes = [type(exc).__name__]
+    codigo = getattr(exc, 'code', None)
+    if codigo is not None:
+        partes.append(str(codigo))
+    estado = getattr(exc, 'status', None)
+    if estado:
+        partes.append(str(estado))
+    mensaje = getattr(exc, 'message', None) or str(exc)
+    if mensaje:
+        partes.append('· ' + _PATRON_CLAVE.sub('AIza***', str(mensaje))[:300])
+    pista = _PISTAS.get(codigo) if isinstance(codigo, int) else None
+    if pista:
+        partes.append('→ ' + pista)
+    return ' '.join(partes)
 INSTRUCCIONES = '''Sos un asesor inmobiliario. Redactá en español rioplatense una explicación de 60 a 80 palabras
 de por qué esta propiedad fue recomendada.
 Reglas:
@@ -44,7 +74,7 @@ class ServicioExplicacionIA:
         try:
             texto, error = resultados.get(timeout=max(.001,self.timeout_s))
             if error:
-                logger.warning('El servicio de IA no respondió correctamente (%s)',type(error).__name__)
+                logger.warning('El servicio de IA no respondió correctamente: %s',describir_error(error))
                 return None
             return texto.strip() if texto and texto.strip() else None
         except queue.Empty:
