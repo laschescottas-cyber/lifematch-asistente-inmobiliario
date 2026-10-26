@@ -6,6 +6,17 @@ Etiquetas: **Agregado** (funcionalidad nueva) · **Cambiado** (cambio de comport
 
 ---
 
+## 25/10/2026 · PR #4 — Gemini rechazaba todos los pedidos por el plazo de espera
+
+**Corregido**
+- La app publicada nunca usaba Gemini: la API respondía `400 INVALID_ARGUMENT · Manually set deadline 8s is too short. Minimum allowed deadline is 10s.` El plazo HTTP se tomaba de `LLM_TIMEOUT_S` (8 s). Ahora se separan dos conceptos: `LLM_TIMEOUT_S` sigue siendo cuánto espera la app antes de usar la plantilla, y el plazo que se declara a la API nunca baja de 10 s. (HU-06, HU-07)
+- La pista del registro para un error 400 culpaba siempre a la clave. Ahora solo lo hace si el motivo menciona la clave; si menciona el plazo, lo dice.
+- 6 tests nuevos (cliente Gemini con un falso, sin red): 82 en total.
+
+**Diagnóstico**
+- La causa se encontró gracias al registro detallado del PR #3, en la primera búsqueda después del merge.
+- Arreglo provisorio mientras tanto: `LLM_TIMEOUT_S = "12"` en Secretos. Con este PR deja de ser necesario, aunque no molesta.
+
 ## 25/10/2026 · PR #3 — Diagnóstico de errores de Gemini y errores ocultos al visitante
 
 **Cambiado**
@@ -17,7 +28,7 @@ Etiquetas: **Agregado** (funcionalidad nueva) · **Cambiado** (cambio de comport
 ## 25/10/2026 · Configuración de la app publicada (Streamlit Cloud → Ajustes → Secretos)
 
 - `CATALOGO = "demo"`, `LLM = "gemini"`, `GEMINI_MODEL = "gemini-3.5-flash-lite"`, `TOP_N = "5"` y la clave de Gemini (no se registra acá).
-- Primera prueba: las explicaciones salieron con la plantilla de respaldo y el registro mostró `ClientError` (Gemini rechazó el pedido). En investigación con el PR #3.
+- Primera prueba: las explicaciones salieron con la plantilla de respaldo y el registro mostró `ClientError` (Gemini rechazó el pedido). Causa encontrada y corregida en el PR #4.
 
 ## 25/10/2026 · PR #2 — App publicada: catálogo de prueba con Gemini real
 
