@@ -1,0 +1,7 @@
+# Configuración de Streamlit versionada con el proyecto (la usan la PC y Streamlit Cloud).
+# Los secretos NO van acá: van en Streamlit Cloud → Ajustes → Secretos (o en .streamlit/secrets.toml, que Git ignora).
+
+[client]
+# Ante un error inesperado, el visitante ve solo un mensaje genérico.
+# El detalle técnico (tipo de error, traceback, código) queda únicamente en el registro: «Manage app».
+showErrorDetails = "none"

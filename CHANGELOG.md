@@ -6,11 +6,13 @@ Etiquetas: **Agregado** (funcionalidad nueva) · **Cambiado** (cambio de comport
 
 ---
 
-## 25/10/2026 · PR #3 — Diagnóstico de errores de Gemini
+## 25/10/2026 · PR #3 — Diagnóstico de errores de Gemini y errores ocultos al visitante
 
 **Cambiado**
 - Cuando Gemini rechaza un pedido, el registro de la app («Manage app» en Streamlit Cloud) muestra el código, el motivo y una pista de qué revisar (por ejemplo: `ClientError 404 NOT_FOUND … → revisá GEMINI_MODEL`). Antes solo decía `ClientError`. La clave nunca aparece en el registro: se enmascara. (HU-06, HU-07)
-- 2 tests nuevos: 74 en total.
+- Ante un error inesperado, los visitantes de la página ven solo un mensaje genérico; el detalle técnico queda únicamente en el registro (`.streamlit/config.toml`, `showErrorDetails = "none"`).
+- `.gitignore` excluye `.streamlit/secrets.toml` para que una clave guardada en la PC nunca se suba a GitHub.
+- 4 tests nuevos: 76 en total.
 
 ## 25/10/2026 · Configuración de la app publicada (Streamlit Cloud → Ajustes → Secretos)
 
