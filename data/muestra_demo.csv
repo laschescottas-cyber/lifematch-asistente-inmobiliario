@@ -1,0 +1,15 @@
+id,ad_type,start_date,end_date,created_on,lat,lon,l1,l2,l3,l4,l5,l6,rooms,bedrooms,bathrooms,surface_total,surface_covered,currency,price_period,title,description,property_type,operation_type,price
+v1,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,3,,,,70,USD,,Departamento en Almagro,"Colegio cerca, parque y subte; home office y contrafrente, ascensor.",Departamento,Venta,190000
+v2,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,,Departamento en Almagro,Subte y metrobús; edificio con oficinas.,Departamento,Venta,160000
+v3,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,3,,,,72,USD,,Departamento en Almagro,"Parque, colegio, plaza y tranquilidad, patio.",Departamento,Venta,210000
+v4,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,56,USD,,Departamento en Almagro,"Ascensor y rampa, clínica cercana, estación de subte.",Departamento,Venta,155000
+v5,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,4,,,,90,USD,,Departamento en Almagro,"Jardín, colegios, silencio y home office.",Departamento,Venta,230000
+v6,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Caballito,,,,3,,,,110,USD,,Casa en Caballito,"Patio, plaza, colegio y tren.",Casa,Venta,180000
+v7,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,,Departamento en Almagro,Tren y subte; departamento tranquilo.,Departamento,Venta,140000
+v8,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,4,,,,100,USD,,Departamento en Almagro,"Parque, escuela, escritorio y subte.",Departamento,Venta,250000
+a1,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,400
+a2,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,420
+a3,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,440
+a4,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,460
+a5,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,480
+a6,Propiedad,2020-01-01,9999-12-31,2020-01-01,-34.6,-58.4,Argentina,Capital Federal,Almagro,,,,2,,,,60,USD,Mensual,Departamento en Almagro,Alquiler mensual,Departamento,Alquiler,500
