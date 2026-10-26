@@ -37,3 +37,14 @@ def icono_para(property_type: str | None) -> str:
     if any(s in tipo for s in ('casa','house')): return '🏠'
     if any(s in tipo for s in ('departamento','apartment','ph')): return '🏢'
     return '🏘️'
+
+
+def formatear_superficie(m2: float | None) -> str:
+    return f'{m2:g} m²'.replace('.',',') if m2 else 'superficie sin dato'
+
+
+def texto_origen(origen: str, demo: bool = False) -> str:
+    """Rótulo honesto del origen de la explicación (HU-06/HU-07, sin mostrar errores técnicos)."""
+    if origen == 'llm':
+        return 'Modo demo: explicación simulada, no generada por Gemini.' if demo else 'Explicación generada con inteligencia artificial (Gemini).'
+    return 'Explicación automática armada con los datos del cálculo.'

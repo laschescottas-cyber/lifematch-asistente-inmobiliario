@@ -4,7 +4,7 @@ import logging
 import os
 from inmobiliaria.arquetipos import PESOS_POR_DEFECTO,DESCRIPCIONES
 from inmobiliaria.modelos import ARQUETIPOS,ETIQUETAS,VARIABLES,Preferencia,PerfilInversor,Usuario
-from inmobiliaria.ui.logica import (slider_a_peso,pesos_desde_sliders,validar_formulario,ordenar_items,formatear_precio,formatear_porcentaje,icono_para)
+from inmobiliaria.ui.logica import (slider_a_peso,pesos_desde_sliders,validar_formulario,ordenar_items,formatear_precio,formatear_porcentaje,icono_para,formatear_superficie,texto_origen)
 from inmobiliaria.catalogo import Catalogo
 from inmobiliaria.repositorio import RepositorioSQLite
 from inmobiliaria.matching import MotorMatching
@@ -24,7 +24,7 @@ def mostrar() -> None:
     st.set_page_config(page_title='LifeMatch · Asistente inmobiliario',page_icon='🏠',layout='centered')
     st.title('🏠 LifeMatch')
     st.caption('Asistente inmobiliario inteligente según tu perfil de vida e inversión')
-    for nombre,valor in {'paso':'perfil','arquetipo':'Familia con hijos','operacion':'Venta','presupuesto':250000.,'moneda':'USD','zona':'Almagro','ambientes':2,'rentabilidad_objetivo':4.,'horizonte_anios':5,'tipo_cambio':0.,'items':None}.items():
+    for nombre,valor in {'paso':'perfil','arquetipo':'Familia con hijos','operacion':'Venta','presupuesto':250000.,'moneda':'USD','zona':'Almagro','ambientes':2,'rentabilidad_objetivo':4.,'horizonte_anios':5,'tipo_cambio':0.,'resultados':None}.items():
         if nombre not in st.session_state: st.session_state[nombre] = valor
     paso = st.session_state.paso
     with st.chat_message('assistant'):
@@ -50,7 +50,7 @@ def mostrar() -> None:
                 st.info('Ruta inversión: compra para alquilar. La operación es siempre Venta.')
             else:
                 st.selectbox('Operación',['Venta','Alquiler'],index=['Venta','Alquiler'].index(st.session_state.operacion),key='form_operacion')
-            st.number_input('Capital máximo de compra (USD)' if inversor else 'Presupuesto máximo',min_value=0.,value=float(st.session_state.presupuesto),key='form_presupuesto')
+            st.number_input('Capital máximo de compra' if inversor else 'Presupuesto máximo',min_value=0.,value=float(st.session_state.presupuesto),key='form_presupuesto')
             st.selectbox('Moneda',['USD','ARS'],index=['USD','ARS'].index(st.session_state.moneda),key='form_moneda')
             st.text_input('Zona (barrio o localidad)',value=st.session_state.zona,key='form_zona')
             st.number_input('Ambientes mínimos',min_value=1,max_value=15,value=int(st.session_state.ambientes),key='form_ambientes')
@@ -114,7 +114,7 @@ def mostrar() -> None:
                 cliente = ClienteDemo(os.getenv('DEMO_LLM','ok').lower()=='falla') if os.getenv('DEMO')=='1' else ClienteGemini()
                 servicio = ServicioExplicacionIA(cliente,PlantillaRespaldo())
                 res = Backend(cat,motor,servicio,repo,top_n()).buscar(pref,perfil)
-                st.session_state.items=res.items
+                st.session_state.resultados=res.items
                 st.session_state.mensaje=res.mensaje
                 st.session_state.paso='resultados'
                 st.rerun()
@@ -129,7 +129,8 @@ def mostrar() -> None:
         with col2:
             if st.button('Editar prioridades'):st.session_state.paso='prioridades';st.rerun()
     else:
-        items=st.session_state.items or []
+        # 'items' choca con el método dict.items() de session_state: se usa 'resultados'.
+        items=st.session_state.resultados or []
         if not items:
             st.warning(st.session_state.get('mensaje') or 'No hay resultados.')
             if st.button('Editar criterios'):st.session_state.paso='datos';st.rerun()
@@ -141,7 +142,7 @@ def mostrar() -> None:
                 with st.container(border=True):
                     st.subheader(f'{icono_para(p.property_type)} {p.title}')
                     st.write(f'{p.property_type or "Propiedad"} · {p.ubicacion}')
-                    st.write(f'**{formatear_precio(p.precio,p.moneda)}** · {p.ambientes} ambientes · {p.surface_covered or p.surface_total or "Sin dato"} m²')
+                    st.write(f'**{formatear_precio(p.precio,p.moneda)}** · {p.ambientes} ambientes · {formatear_superficie(p.surface_covered or p.surface_total)}')
                     st.metric('LifeMatch · índice de compatibilidad',formatear_porcentaje(m.porcentaje_compatibilidad))
                     if m.rentabilidad is not None:
                         st.markdown('**Rentabilidad bruta anual estimada (dato separado del LifeMatch)**')
@@ -149,7 +150,7 @@ def mostrar() -> None:
                         st.write(formatear_porcentaje(r.rentabilidad_bruta_anual) if r.disponible else 'Sin datos suficientes')
                     st.write(e.texto)
                     with st.expander('Detalle y variables del cálculo'):
-                        if e.origen=='llm': st.caption('Explicación generada con inteligencia artificial')
+                        st.caption(texto_origen(e.origen,os.getenv('DEMO')=='1'))
                         for v,d in m.detalle.items():
                             st.write(f'{ETIQUETAS[v]} · aporte {formatear_porcentaje(d.aporte)}')
                             st.progress(min(1.,max(0.,d.cumplimiento)))
