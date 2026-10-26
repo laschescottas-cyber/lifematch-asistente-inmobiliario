@@ -15,7 +15,7 @@ from inmobiliaria.config import timeout_s as config_timeout
 logger = logging.getLogger(__name__)
 _PATRON_CLAVE = re.compile(r'AIza[0-9A-Za-z_\-]{8,}')
 _PISTAS = {
-    400: 'revisá GEMINI_API_KEY (clave inválida o mal copiada) o el formato del pedido',
+    400: 'pedido inválido: leé el motivo de arriba',
     401: 'revisá GEMINI_API_KEY',
     403: 'la clave no tiene permiso para este modelo o proyecto',
     404: 'revisá GEMINI_MODEL: el modelo no existe o no está habilitado para la cuenta',
@@ -39,6 +39,11 @@ def describir_error(exc: Exception) -> str:
     if mensaje:
         partes.append('· ' + _PATRON_CLAVE.sub('AIza***', str(mensaje))[:300])
     pista = _PISTAS.get(codigo) if isinstance(codigo, int) else None
+    texto = str(mensaje).lower()
+    if codigo == 400 and 'api key' in texto:
+        pista = 'revisá GEMINI_API_KEY (clave inválida o mal copiada)'
+    elif codigo == 400 and 'deadline' in texto:
+        pista = 'el plazo pedido a la API es menor al mínimo que acepta'
     if pista:
         partes.append('→ ' + pista)
     return ' '.join(partes)
