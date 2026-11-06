@@ -4,11 +4,13 @@ Trabajo Práctico Integrador — Desarrollo de Software con Inteligencia Artific
 
 **Objetivo:** recomendar inmuebles por la intención de búsqueda y el perfil de vida o inversión. Dos recorridos: **vivir** (compra/alquiler, cuatro perfiles) e **invertir** (compra para alquilar).
 
+**Aplicación publicada:** https://lifematch-asistente-inmobiliario-les4zkedrmirvjywza4ysz.streamlit.app/
+
 El sistema combina: (1) filtros duros, (2) índice reproducible **LifeMatch** (0–100), (3) estimador estadístico de rentabilidad bruta para inversor, (4) explicación mediante la API de **Gemini** con **plantilla de respaldo**. LifeMatch es un algoritmo determinístico, no un modelo entrenado; la rentabilidad tampoco es ML. La integración con Gemini es la funcionalidad de IA auténtica (HU-06).
 
 ## Requisitos
 
-- **Windows 11 y Python 3.12** (la suite se ejecutó en el entorno de desarrollo también con Python 3.13; verificar específicamente Python 3.12 en la PC del equipo).
+- **Windows 11 y Python 3.14**, la versión que usa el equipo en sus PC y la que ejecuta Streamlit Cloud. La suite de 82 pruebas también pasa con Python 3.13.
 - Acceso a internet y clave de Gemini para demostrar la explicación real con LLM; para el modo demo no hacen falta.
 - Dataset Properati Argentina CSV para usar los avisos históricos reales.
 
@@ -17,7 +19,7 @@ El sistema combina: (1) filtros duros, (2) índice reproducible **LifeMatch** (0
 Desde la raíz del repositorio:
 
 ```powershell
-py -3.12 -m venv .venv
+py -3.14 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
@@ -148,26 +150,29 @@ La muestra analizada en el trabajo académico incluye avisos de **2019–2020**,
 
 ## Uso de IA en el desarrollo — Eje 2
 
-Se generó una base de código, tests y documentación con asistencia de GPT-6 a partir del TP y un prompt técnico detallado. **El equipo debe revisar, comprender, corregir y validar** el código, y completar `docs/registro_uso_ia.md` indicando las decisiones reales, cambios y responsables. No declarar pruebas manuales o revisiones no efectuadas. Para la entrega final el docente también exige registro de IA en análisis, diseño, gestión y pruebas, más reflexión crítica propia.
+El proyecto se desarrolló con asistencia de IA en todas las etapas: Claude para el análisis, el diseño y el prompt maestro (23/10/2026); ChatGPT para la primera base de código, pruebas y documentación a partir de ese prompt (24/10/2026); y Claude, con acceso al repositorio, para incorporar el código, corregir errores, diagnosticar la integración con Gemini y documentar (PR #1 a #4, 25/10/2026). El equipo definió la especificación, probó la app en la PC y en la nube, leyó los registros y aprobó cada pull request. El registro completo está en el documento del TP (punto 8) y en `docs/registro_uso_ia.md`.
 
 ## Git / Trello
 
-Registrar commits graduales usando `[HU-0X]` y, para HU-05, HU-06 y HU-07, `[IA]`. Ejemplos:
+Cada commit empieza con la historia de usuario que implementa y, para HU-05, HU-06 y HU-07, con la etiqueta `[IA]`, la misma del tablero de Trello «Grupo 5 Desarrollo IA Asistente Inmobiliario». Ejemplos reales del historial:
 
 ```text
-[HU-04] Normalización del catálogo Properati
-[HU-05][IA] LifeMatch y rentabilidad estadística
-[HU-06][IA] Integración Gemini con servicio XAI
-[HU-07][IA] Timeout y plantilla de contingencia
-[HU-08] Tarjetas de resultados y detalle
+[HU-08] Corregir pantalla de resultados y agregar tests de UI
+[HU-06][IA] Pedir explicaciones a Gemini en paralelo
+[HU-04][HU-06][IA] Separar fuente del catálogo y proveedor de IA
+[HU-06][HU-07][IA] Plazo HTTP de Gemini nunca menor a 10 s
 ```
 
-No simular un historial de commits: registrar los cambios a partir de ahora. En Trello registrar **tres momentos reales** con capturas distintas (no fabricar el progreso).
+Cada cambio se trabaja en una rama, se abre un pull request y se aprueba antes de llegar a `main`. El trabajo colaborativo se hace en el repositorio de desarrollo `lifematch-dev`; los cambios aprobados se incorporan a producción para publicarlos.
 
 ## Seguridad y buenas prácticas
 
 `.gitignore` excluye `.env`, las bases SQLite, el CSV completo y el entorno virtual. `.env.example` contiene variables vacías. No se envían nombre ni email de usuario al prompt del LLM; se usan únicamente datos estructurados del match. El sistema guarda un usuario genérico `Visitante`, sin pedir email. El estimador filtra por barrio, tipo, moneda compatible y períodos mensuales; la cantidad mínima de avisos comparables es configurable.
 
-## Antes de entregar al docente
+## Estado del proyecto (versión 1.0.0)
 
-Validar el **SDK y la API reales**, verificar valores reales de moneda/periodicidad en el CSV completo, probar con Python 3.12/Windows 11 y realizar la demo de Streamlit en una PC del equipo. Revisar los wireframes y el DER del DOCX, documentar el uso real de IA en cinco etapas, completar tres capturas auténticas de Trello y configurar un repositorio GitHub público/privado elegido por el grupo.
+- Aplicación publicada en Streamlit Community Cloud, con Gemini real y plantilla de respaldo.
+- 82 pruebas automáticas aprobadas (`python -m pytest -q`).
+- Ejecución verificada en Windows con Python 3.14 y en Streamlit Cloud.
+- Ocho historias de usuario implementadas y trazadas en Trello.
+- Próximo paso: cargar el dataset completo de Properati y las mejoras de LifeMatch 2.0 del tablero.
